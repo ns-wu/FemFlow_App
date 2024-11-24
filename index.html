@@ -4,24 +4,26 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="styles.css" rel="stylesheet">
+    <title>FemFlow</title>
 </head>
 <body>
 
-<button id="connect" type="button">Connect</button>
+<h1>FemFlow</h1>
 
+<button id="connect" type="button">Connect</button>
 <button id="disconnect" type="button">Disconnect</button>
+
+<h2>SmartCup Fill Level</h2>
+<div id="progress-container">
+    <progress id="fill-level" value="0" max="100"></progress>
+</div>
+
+<h2>Battery Level: <span id="battery-level">0%</span></h2>
 
 <div id="terminal"></div>
 
-<form id="send-form">
-    <input id="input" type="text">
-    <button type="submit">Send</button>
-</form>
-
 <script src="main.js"></script>
-
 <script src="companion.js" data-service-worker="sw.js"></script>
-
 
 </body>
 </html>
