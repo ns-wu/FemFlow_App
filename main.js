@@ -1,6 +1,10 @@
-// Selected device object cache
-let deviceCache = null;
-let characteristicCache = null;
+
+// Get references to UI elements
+let connectButton = document.getElementById('connect');
+let disconnectButton = document.getElementById('disconnect');
+let terminalContainer = document.getElementById('terminal');
+let sendForm = document.getElementById('send-form');
+let inputField = document.getElementById('input');
 
 // Connect to the device on Connect button click
 connectButton.addEventListener('click', function() {
@@ -20,7 +24,10 @@ sendForm.addEventListener('submit', function(event) {
   inputField.focus();     // Focus on text field
 });
 
-// Launch Bluetooth device chooser and connect to the selected device
+// Selected device object cache
+let deviceCache = null;
+
+// Launch Bluetooth device chooser and connect to the selected
 function connect() {
   return (deviceCache ? Promise.resolve(deviceCache) :
       requestBluetoothDevice()).
@@ -33,32 +40,35 @@ function requestBluetoothDevice() {
   log('Requesting bluetooth device...');
 
   return navigator.bluetooth.requestDevice({
-    filters: [{services: ['heart_rate']}] // Adjust to match the correct service UUID
+    filters: [{services: [0x180D]}],
   }).
-  then(device => {
-    log('"' + device.name + '" bluetooth device selected');
-    deviceCache = device;
+      then(device => {
+        log('"' + device.name + '" bluetooth device selected');
+        deviceCache = device;
 
-    // Ensure proper handling of disconnection
-    deviceCache.addEventListener('gattserverdisconnected', handleDisconnection);
+        // Added line
+        deviceCache.addEventListener('gattserverdisconnected',
+          handleDisconnection);
 
-    return deviceCache;
-  });
+        return deviceCache;
+      });
 }
 
-// Handle disconnection event
 function handleDisconnection(event) {
   let device = event.target;
 
-  log('"' + device.name + '" bluetooth device disconnected, trying to reconnect...');
+  log('"' + device.name +
+      '" bluetooth device disconnected, trying to reconnect...');
 
-  // Automatically reconnect on disconnection
   connectDeviceAndCacheCharacteristic(device).
-  then(characteristic => startNotifications(characteristic)).
-  catch(error => log(error));
+      then(characteristic => startNotifications(characteristic)).
+      catch(error => log(error));
 }
 
-// Connect to the device and get the characteristic
+// Characteristic object cache
+let characteristicCache = null;
+
+// Connect to the device specified, get service and characteristic
 function connectDeviceAndCacheCharacteristic(device) {
   if (device.gatt.connected && characteristicCache) {
     return Promise.resolve(characteristicCache);
@@ -67,34 +77,37 @@ function connectDeviceAndCacheCharacteristic(device) {
   log('Connecting to GATT server...');
 
   return device.gatt.connect().
-  then(server => {
-    log('GATT server connected, getting service...');
+      then(server => {
+        log('GATT server connected, getting service...');
 
-    return server.getPrimaryService(0x180D); // Heart Rate service UUID
-  }).
-  then(service => {
-    log('Service found, getting characteristic...');
+        return server.getPrimaryService(0x180D);
+      }).
+      then(service => {
+        log('Service found, getting characteristic...');
 
-    return service.getCharacteristic(0x2A37); // Heart Rate Measurement characteristic UUID
-  }).
-  then(characteristic => {
-    log('Characteristic found');
-    characteristicCache = characteristic;
+        return service.getCharacteristic(0x2A37);
+      }).
+      then(characteristic => {
+        log('Characteristic found');
+        characteristicCache = characteristic;
 
-    return characteristicCache;
-  });
+        return characteristicCache;
+      });
 }
 
-// Start notifications on the characteristic
+// Enable the characteristic changes notification
 function startNotifications(characteristic) {
   log('Starting notifications...');
 
   return characteristic.startNotifications().
-  then(() => {
-    log('Notifications started');
-    characteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged);
-  });
+      then(() => {
+        log('Notifications started');
+        // Added line
+        characteristic.addEventListener('characteristicvaluechanged',
+            handleCharacteristicValueChanged);
+      });
 }
+
 
 // Output to terminal
 function log(data, type = '') {
@@ -106,20 +119,23 @@ function log(data, type = '') {
 function disconnect() {
   if (deviceCache) {
     log('Disconnecting from "' + deviceCache.name + '" bluetooth device...');
-    deviceCache.removeEventListener('gattserverdisconnected', handleDisconnection);
+    deviceCache.removeEventListener('gattserverdisconnected',
+        handleDisconnection);
 
     if (deviceCache.gatt.connected) {
       deviceCache.gatt.disconnect();
       log('"' + deviceCache.name + '" bluetooth device disconnected');
     }
     else {
-      log('"' + deviceCache.name + '" bluetooth device is already disconnected');
+      log('"' + deviceCache.name +
+          '" bluetooth device is already disconnected');
     }
   }
 
-  // Clean up characteristic listener and cache
+  // Added condition
   if (characteristicCache) {
-    characteristicCache.removeEventListener('characteristicvaluechanged', handleCharacteristicValueChanged);
+    characteristicCache.removeEventListener('characteristicvaluechanged',
+        handleCharacteristicValueChanged);
     characteristicCache = null;
   }
 
@@ -129,7 +145,7 @@ function disconnect() {
 // Intermediate buffer for incoming data
 let readBuffer = '';
 
-// Handle incoming characteristic value changes
+// Data receiving
 function handleCharacteristicValueChanged(event) {
   let value = new TextDecoder().decode(event.target.value);
 
@@ -161,10 +177,9 @@ function send(data) {
     return;
   }
 
-  data += '\n'; // Ensure proper line termination for the device
+  data += '\n';
 
   if (data.length > 20) {
-    // Split long messages into chunks (BLE write limit is often 20 bytes)
     let chunks = data.match(/(.|[\r\n]){1,20}/g);
 
     writeToCharacteristic(characteristicCache, chunks[0]);
@@ -182,9 +197,3 @@ function send(data) {
   log(data, 'out');
 }
 
-// Write data to the characteristic
-function writeToCharacteristic(characteristic, data) {
-  const encoder = new TextEncoder();
-  const buffer = encoder.encode(data);
-  characteristic.writeValue(buffer).catch(error => log(error));
-}
