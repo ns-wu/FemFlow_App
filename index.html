@@ -7,6 +7,7 @@
     <!-- FullCalendar CSS -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
 <!-- FullCalendar JavaScript -->
+    <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
     <title>FemFlow</title>
@@ -92,6 +93,14 @@
 
 <script src="main.js"></script>
 <script src="companion.js" data-service-worker="sw.js"></script>
+<script src="firebase.js"></script>
+<script type="module" src="firebase.js"></script>  <!-- Make sure the path is correct -->
+
+<!-- Add Firebase SDK scripts -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
+
 
 </body>
 </html>

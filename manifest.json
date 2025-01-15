@@ -1,5 +1,11 @@
 {
     "name": "FemFlow",
+    "short_name": "FemFlow",
+    "description": "Track menstrual cycle with sensor integration",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#FFF9EC",
+    "theme_color": "#B2035B",
     "icons": [
       {
         "src": "/images/icons/favicon-96x96.png",
@@ -21,8 +27,5 @@
         "sizes": "512x512",
         "type": "image/png"
       }
-    ],
-    "theme_color": "#ffffff",
-    "background_color": "#ffffff",
-    "display": "standalone"
+    ]
   }

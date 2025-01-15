@@ -197,3 +197,26 @@ function send(data) {
   log(data, 'out');
 }
 
+// Write a new sensor value to the database
+function writeSensorData(userId, data) {
+  const sensorDataRef = ref(database, 'sensors/' + userId);
+  set(sensorDataRef, {
+    timestamp: Date.now(),
+    sensorValue: data
+  });
+}
+
+// Fetch sensor data from the database
+function getSensorData(userId) {
+  const sensorDataRef = ref(database, 'sensors/' + userId);
+  get(sensorDataRef).then((snapshot) => {
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      console.log('Sensor Data:', data);
+    } else {
+      console.log('No data available');
+    }
+  }).catch((error) => {
+    console.error(error);
+  });
+}
