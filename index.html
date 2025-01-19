@@ -1,106 +1,49 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="styles.css" rel="stylesheet">
-    <!-- FullCalendar CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
-<!-- FullCalendar JavaScript -->
-    <link rel="manifest" href="manifest.json">
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FemFlow</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <h1>FemFlow</h1>
 
-<h1>FemFlow</h1>
+    <div class="button-container">
+        <button id="connect" type="button">Connect</button>
+        <button id="disconnect" type="button">Disconnect</button>
+    </div>
+    
+    <h2>SmartCup Fill Level</h2>
+    <div id="progress-container">
+        <progress id="fill-level" value="50" max="100"></progress>
+    </div>
+    
+    <h2>Battery Level: <span id="battery-level">100%</span></h2>
+    
+    <div class="card">
+        <div class="card-header">
+            <div class="header-content">
+                <h1 class="title">Period Tracker</h1>
+                <div class="navigation">
+                    <button class="nav-button" id="prevMonth">←</button>
+                    <span class="current-month" id="currentMonthYear"></span>
+                    <button class="nav-button" id="nextMonth">→</button>
+                </div>
+            </div>
+        </div>
+        <div class="calendar-grid" id="calendar"></div>
+    </div>
 
-<div class="button-container">
-    <button id="connect" type="button">Connect</button>
-    <button id="disconnect" type="button">Disconnect</button>
-</div>
+    <div class="input-section">
+        <div class="input-group">
+            <input type="date" id="date-input" placeholder="Date">
+            <input type="number" id="reading-value-input" placeholder="Reading Value">
+            <button id="add-button">Add Reading</button>
+        </div>
+    </div>
 
-<h2>SmartCup Fill Level</h2>
-<div id="progress-container">
-    <progress id="fill-level" value="50" max="100"></progress>
-</div>
-
-<h2>Battery Level: <span id="battery-level">100%</span></h2>
-
-<div id="calendar-container">
-    <h2>Menstrual Cycle Tracker</h2>
-    <div id="calendar"></div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Hardcoded variables for the demo
-        const cycleStart = '2024-11-01'; // Start of the last period
-        const ovulationDay = 14; // Ovulation occurs 14 days after the cycle start
-
-        // Flow data for the period
-        const flowData = [
-            { date: '2024-11-01', flow: 100 }, // Heavy
-            { date: '2024-11-02', flow: 75 },  // Medium-heavy
-            { date: '2024-11-03', flow: 50 },  // Medium
-            { date: '2024-11-04', flow: 25 },  // Light
-            { date: '2024-11-05', flow: 10 },  // Spotting
-        ];
-
-        // Calculate ovulation date
-        const ovulationDate = new Date(cycleStart);
-        ovulationDate.setDate(ovulationDate.getDate() + ovulationDay);
-
-        // Function to generate flow-based color
-        const getFlowColor = (flow) => `rgba(255, 99, 132, ${flow / 100})`; // Red with varying opacity
-
-        // Generate flow events
-        const flowEvents = flowData.map(day => ({
-            title: `Flow: ${day.flow}%`,
-            start: day.date,
-            color: getFlowColor(day.flow),
-        }));
-
-        // Ovulation event
-        const ovulationEvent = {
-            title: 'Ovulation',
-            start: ovulationDate.toISOString().split('T')[0],
-            color: '#36a2eb', // Blue for ovulation
-        };
-
-        // Combine events
-        const events = [...flowEvents, ovulationEvent];
-
-        // Initialize FullCalendar
-        const calendarEl = document.getElementById('calendar');
-
-        const calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth', // Monthly view
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek'
-            },
-            events: events,
-        });
-
-        calendar.render();
-    });
-</script>
-<div id="terminal"></div>
-
-<script src="main.js"></script>
-<script src="companion.js" data-service-worker="sw.js"></script>
-<script src="firebase.js"></script>
-<script type="module" src="firebase.js"></script>  <!-- Make sure the path is correct -->
-
-<!-- Add Firebase SDK scripts -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
-
-
+    <script type="module" src="script.js"></script>
+      
 </body>
 </html>

@@ -1,11 +1,15 @@
-/* Set the background color of the entire page */
-body {
-    background-color: #FFF9EC;
+* {
+    box-sizing: border-box;
     margin: 0;
-    font-family: Georgia, serif;
+    padding: 0;
 }
 
-/* Style for the main title (h1) */
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    padding: 20px;
+    background-color: #FFF9EC;
+}
+
 h1 {
     color: #B2035B; /* Updated red color */
     font-weight: bold;
@@ -19,19 +23,6 @@ h2 {
     text-align: center;
 }
 
-/* Style for the terminal output */
-#terminal {
-    color: gray;
-}
-
-#terminal div.out {
-    color: #e94242; /* Updated red color */
-}
-
-#terminal div.in {
-    color: blue;
-}
-
 /* Styling for buttons */
 .button-container {
   display: flex;
@@ -41,8 +32,6 @@ h2 {
 }
 
 button {
-  font-family: Georgia, serif; 
-  font-size: 16px;
   color: #B2035B;
   padding: 10px 20px;
   margin: 10px;
@@ -86,3 +75,227 @@ progress::-moz-progress-bar {
   background-color: #DE3A86; /* Color for Firefox's filled portion */
   border-radius: 5px;
 }
+  
+
+
+.card {
+    background-color: #FFF9EC;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.card-header {
+    padding: 20px;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #394648;
+}
+
+.navigation {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.nav-button {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 16px; /* Ensure the pointer/icon is visible */
+    color: #394648; /* Default color */
+    transition: color 0.3s ease; /* Smooth transition for color change */
+}
+
+.nav-button:hover {
+    background-color: #F9C1E6;
+}
+
+.current-month {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    padding: 20px;
+    gap: 1px;
+    background-color: #F9C1E6 ;
+}
+
+.weekday {
+    padding: 8px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    color: #394648;
+}
+
+.calendar-day {
+    height: 100px;
+    padding: 8px;
+    background-color: #FFF9EC;
+    overflow-y: auto;
+}
+
+.calendar-day.empty {
+    background-color: #FFF9EC;
+}
+
+.calendar-day.today {
+    background-color: #fef0f9;
+}
+
+.day-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.day-number {
+    font-size: 14px;
+}
+
+.today .day-number {
+    font-weight: bold;
+}
+
+.reading-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: #B2035B;
+}
+
+.readings-list {
+    font-size: 12px;
+    color: #394648;
+    margin-top: 4px;
+}
+
+.input-section {
+    margin: 20px auto;
+    max-width: 1000px;
+    background: #FFF9EC;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+input {
+    padding: 8px;
+    border: 1px solid #fbd8ef;
+    border-radius: 4px;
+}
+
+button {
+    padding: 8px 16px;
+    background-color: #DE3A86;
+    color: #FFF9EC;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #B2035B;
+}
+
+.readings-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popup-content {
+    background-color: #FFF9EC;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.close-popup {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border: none;
+    background: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0 8px;
+}
+
+.reading-entry {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.reading-entry:last-child {
+    border-bottom: none;
+}
+
+.reading-time {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.reading-value {
+    cursor: pointer;
+    padding: 2px 6px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    margin-left: 4px;
+}
+
+.reading-value:hover {
+    background-color: #e0e0e0;
+}
+
+.reading-difference {
+    margin-left: 8px;
+    font-size: 0.9em;
+}
+
+.reading-difference.increase {
+    color: #28a745;
+}
+
+.reading-difference.decrease {
+    color: #dc3545;
+}
+
+.reading-time {
+    float: right;
+    color: #666;
+    font-size: 0.9em;
+}
+
