@@ -283,7 +283,7 @@ class Calendar {
         const bleControls = document.createElement('div');
         bleControls.className = 'ble-controls';
         bleControls.innerHTML = `
-            <button id="connect-ble">Connect Device</button>
+            <button id="connect-ble">Connect to Cup</button>
             <button id="disconnect-ble">Disconnect</button>
         `;
         
