@@ -106,36 +106,42 @@ class BLEManager {
     }
 }
 
-class Terminal {
-    constructor() {
-        this.createTerminalUI();
+class SerialMonitor {
+    constructor(socketUrl) {
+        this.socket = new WebSocket(socketUrl);
+        this.createMonitorUI();
         this.logs = [];
-        this.maxLogs = 100; // Maximum number of logs to keep
+        this.maxLogs = 100;
+
+        this.socket.onopen = () => this.log("Connected to Serial Device");
+        this.socket.onmessage = (event) => this.log(event.data);
+        this.socket.onerror = (error) => this.log(`WebSocket Error: ${error.message}`);
+        this.socket.onclose = () => this.log("Disconnected from Serial Device");
     }
 
-    createTerminalUI() {
-        // Create terminal container
-        const terminal = document.createElement('div');
-        terminal.className = 'terminal';
-        terminal.innerHTML = `
-            <div class="terminal-header">
-                <span>Device Terminal</span>
-                <button id="clear-terminal">Clear</button>
+    createMonitorUI() {
+        // Create serial monitor container
+        const monitor = document.createElement('div');
+        monitor.className = 'serial-monitor';
+        monitor.innerHTML = `
+            <div class="monitor-header">
+                <span>Serial Monitor</span>
+                <button id="clear-monitor">Clear</button>
             </div>
-            <div class="terminal-body" id="terminal-body"></div>
-            <div class="terminal-input">
-                <input type="text" id="terminal-command" placeholder="Enter command...">
-                <button id="send-command">Send</button>
+            <div class="monitor-body" id="monitor-body"></div>
+            <div class="monitor-input">
+                <input type="text" id="monitor-command" placeholder="Type command...">
+                <button id="send-monitor-command">Send</button>
             </div>
         `;
 
-        // Add terminal to page
-        document.body.appendChild(terminal);
+        // Add monitor to page
+        document.body.appendChild(monitor);
 
-        // Setup event listeners
-        document.getElementById('clear-terminal').addEventListener('click', () => this.clear());
-        document.getElementById('send-command').addEventListener('click', () => this.sendCommand());
-        document.getElementById('terminal-command').addEventListener('keypress', (e) => {
+        // Event listeners
+        document.getElementById('clear-monitor').addEventListener('click', () => this.clear());
+        document.getElementById('send-monitor-command').addEventListener('click', () => this.sendCommand());
+        document.getElementById('monitor-command').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.sendCommand();
         });
     }
@@ -145,43 +151,44 @@ class Terminal {
         const logEntry = `[${timestamp}] ${message}`;
         this.logs.push(logEntry);
 
-        // Trim logs if exceeding max length
         if (this.logs.length > this.maxLogs) {
-            this.logs.shift();
+            this.logs.shift(); // Remove old logs
         }
 
-        // Update terminal display
-        const terminalBody = document.getElementById('terminal-body');
+        const monitorBody = document.getElementById('monitor-body');
         const logElement = document.createElement('div');
-        logElement.className = 'terminal-log';
+        logElement.className = 'monitor-log';
         logElement.textContent = logEntry;
-        terminalBody.appendChild(logElement);
-        terminalBody.scrollTop = terminalBody.scrollHeight;
+        monitorBody.appendChild(logElement);
+        monitorBody.scrollTop = monitorBody.scrollHeight; // Auto-scroll
     }
 
     clear() {
         this.logs = [];
-        const terminalBody = document.getElementById('terminal-body');
-        terminalBody.innerHTML = '';
+        document.getElementById('monitor-body').innerHTML = '';
     }
 
-    async sendCommand() {
-        const commandInput = document.getElementById('terminal-command');
+    sendCommand() {
+        const commandInput = document.getElementById('monitor-command');
         const command = commandInput.value.trim();
-        
-        if (command) {
-            // Get BLE manager instance and send command
-            // This would need to be connected to your BLE manager instance
+
+        if (command && this.socket.readyState === WebSocket.OPEN) {
+            this.socket.send(command);
             this.log(`> ${command}`);
             commandInput.value = '';
+        } else {
+            this.log("Error: Unable to send command (socket closed or command empty)");
         }
     }
 }
 
-// Add CSS styles for the terminal
+// Usage: Replace `ws://your-websocket-url` with your actual WebSocket server address
+const serialMonitor = new SerialMonitor("ws://localhost:8765"); 
+
+// Add CSS styles for the serial monitor
 const style = document.createElement('style');
 style.textContent = `
-    .terminal {
+    .serial-monitor {
         position: fixed;
         bottom: 20px;
         right: 20px;
@@ -195,7 +202,7 @@ style.textContent = `
         z-index: 1000;
     }
 
-    .terminal-header {
+    .monitor-header {
         padding: 10px;
         background: #394648;
         border-top-left-radius: 8px;
@@ -206,21 +213,23 @@ style.textContent = `
         color: #FFF9EC;
     }
 
-    .terminal-body {
+    .monitor-body {
         flex-grow: 1;
         padding: 10px;
         overflow-y: auto;
         color: #FFF9EC;
         font-family: monospace;
         font-size: 14px;
+        background: #222; /* Darker background for better contrast */
+        border-top: 1px solid #555;
     }
 
-    .terminal-log {
+    .monitor-log {
         margin: 2px 0;
         word-wrap: break-word;
     }
 
-    .terminal-input {
+    .monitor-input {
         display: flex;
         padding: 10px;
         background: #394648;
@@ -228,23 +237,23 @@ style.textContent = `
         border-bottom-right-radius: 8px;
     }
 
-    .terminal-input input {
+    .monitor-input input {
         flex-grow: 1;
         margin-right: 10px;
         padding: 5px;
-        background:  #DE3A86;
+        background: #DE3A86;
         border: 1px solid #555;
         color: #FFF9EC;
         border-radius: 4px;
     }
     
-    .terminal-input input::placeholder {
-        color: #FFD2E5; /* Light pink placeholder to complement the input's background */
-        opacity: 1; /* Ensures the placeholder text is fully opaque */
+    .monitor-input input::placeholder {
+        color: #FFD2E5;
+        opacity: 1;
     }
 
-    .terminal-input button,
-    .terminal-header button {
+    .monitor-input button,
+    .monitor-header button {
         padding: 5px 10px;
         background: #DE3A86;
         color: #FFF9EC;
@@ -253,12 +262,13 @@ style.textContent = `
         cursor: pointer;
     }
 
-    .terminal-input button:hover,
-    .terminal-header button:hover {
+    .monitor-input button:hover,
+    .monitor-header button:hover {
         background: #F9C1E6;
     }
 `;
 document.head.appendChild(style);
+
 
 // Initialize BLE manager and connect it to your Calendar class
 class Calendar {
