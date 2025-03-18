@@ -183,6 +183,22 @@
         .today .day-number {
             font-weight: bold;
         }
+        /* Add these styles to your existing CSS */
+        .calendar-day.ovulation {
+            background-color: #fef0f9; /* Using the 'today' background color for ovulation days */
+        }
+
+        .calendar-day .day-number.highlighted {
+            font-weight: bold;
+            color: #B2035B; /* Pink highlight for the current day number */
+            background-color: #F9C1E6;
+            border-radius: 50%;
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+        }
 
         .reading-value {
             font-size: 14px;
@@ -774,10 +790,28 @@
                 // Period data (simulated)
                 const periodStart = new Date(2025, 2, 21); // March 11, 2025
                 const periodEnd = new Date(2025, 2, 25);   // March 15, 2025
+
+                const lastPeriodStart = new Date(2025, 1, 10); // February 10, 2025
+                const lastPeriodEnd = new Date(2025, 1, 14);   // February 14, 2025
                 
                 // Predicted next period
                 const nextPeriodStart = new Date(2025, 3, 20); // April 8, 2025
                 const nextPeriodEnd = new Date(2025, 3, 24);  // April 12, 2025
+                
+                const pastOvulationDay = new Date(periodStart);
+                pastOvulationDay.setDate(pastOvulationDay.getDate() - 14);
+                const pastOvulationStart = new Date(pastOvulationDay);
+                pastOvulationStart.setDate(pastOvulationDay.getDate() - 1);
+                const pastOvulationEnd = new Date(pastOvulationDay);
+                pastOvulationEnd.setDate(pastOvulationDay.getDate() + 1);
+                
+                // Calculate ovulation days (typically 14 days before next period starts)
+                const ovulationDay = new Date(nextPeriodStart);
+                ovulationDay.setDate(ovulationDay.getDate() - 14);
+                const ovulationStart = new Date(ovulationDay);
+                ovulationStart.setDate(ovulationDay.getDate() - 1); // Day before peak
+                const ovulationEnd = new Date(ovulationDay);
+                ovulationEnd.setDate(ovulationDay.getDate() + 1);   // Day after peak
                 
                 for (let day = 1; day <= daysInMonth; day++) {
                     const date = new Date(
@@ -785,9 +819,8 @@
                         currentDate.getMonth(),
                         day
                     );
-                    
-                    // const isToday = date.toDateString() === today.toDateString();
-                    const isToday = date.getDate() === 24;
+                    // const isFocusDay = date.getDate() === today.toDateString();
+                    const isFocusDay = date.getDate() === 24; // The 24th day of any month
                     const dateStr = formatDate(date);
                     const readings = readingsData[dateStr] || [];
                     
@@ -797,14 +830,30 @@
                     // Check if this date is within the predicted period
                     const isPredictedPeriodDay = date >= nextPeriodStart && date <= nextPeriodEnd;
                     
+                    // Check if this date is within ovulation window
+                    const isOvulationDay = date >= ovulationStart && date <= ovulationEnd;
+                    const isPastOvulationDay = date >= pastOvulationStart && date <= pastOvulationEnd;
+                    
+                    // Build class name with priority order (period > ovulation > predicted)
+                    let dayClass = 'calendar-day';
+                    if (isPeriodDay) {
+                        dayClass += ' period';
+                    } else if (isOvulationDay) {
+                        dayClass += ' ovulation';
+                    } else if (isPastOvulationDay) {
+                        dayClass += ' ovulation';
+                    } else if (isPredictedPeriodDay) {
+                        dayClass += ' predicted';
+                    }
+                    
                     const dayElement = document.createElement('div');
-                    dayElement.className = `calendar-day${isToday ? ' today' : ''}${isPeriodDay ? ' period' : ''}${isPredictedPeriodDay ? ' predicted' : ''}`;
+                    dayElement.className = dayClass;
                     
                     const dayHeader = document.createElement('div');
                     dayHeader.className = 'day-header';
                     
                     const dayNumber = document.createElement('span');
-                    dayNumber.className = 'day-number';
+                    dayNumber.className = isFocusDay ? 'day-number highlighted' : 'day-number';
                     dayNumber.textContent = day;
                     
                     dayHeader.appendChild(dayNumber);
