@@ -731,11 +731,11 @@
             let currentDate = new Date();
 
             let readingsData = {
-                "2025-03-11": [{ reading: 12.5, timestamp: new Date("2025-03-11T08:30:00").getTime() }],
-                "2025-03-12": [{ reading: 18.3, timestamp: new Date("2025-03-12T09:15:00").getTime() }],
-                "2025-03-13": [{ reading: 15.7, timestamp: new Date("2025-03-13T10:00:00").getTime() }],
-                "2025-03-14": [{ reading: 8.2, timestamp: new Date("2025-03-14T08:45:00").getTime() }],
-                "2025-03-15": [{ reading: 3.1, timestamp: new Date("2025-03-15T09:30:00").getTime() }]
+                "2025-03-21": [{ reading: 12.5, timestamp: new Date("2025-03-11T08:30:00").getTime() }],
+                "2025-03-22": [{ reading: 18.3, timestamp: new Date("2025-03-12T09:15:00").getTime() }],
+                "2025-03-23": [{ reading: 15.7, timestamp: new Date("2025-03-13T10:00:00").getTime() }],
+                "2025-03-24": [{ reading: 8.2, timestamp: new Date("2025-03-14T08:45:00").getTime() }],
+                "2025-03-25": [{ reading: 3.1, timestamp: new Date("2025-03-15T09:30:00").getTime() }]
             };
             
             function renderCalendar() {
@@ -772,12 +772,12 @@
                 const today = new Date();
                 
                 // Period data (simulated)
-                const periodStart = new Date(2025, 2, 11); // March 11, 2025
-                const periodEnd = new Date(2025, 2, 15);   // March 15, 2025
+                const periodStart = new Date(2025, 2, 21); // March 11, 2025
+                const periodEnd = new Date(2025, 2, 25);   // March 15, 2025
                 
                 // Predicted next period
-                const nextPeriodStart = new Date(2025, 3, 8); // April 8, 2025
-                const nextPeriodEnd = new Date(2025, 3, 12);  // April 12, 2025
+                const nextPeriodStart = new Date(2025, 3, 20); // April 8, 2025
+                const nextPeriodEnd = new Date(2025, 3, 24);  // April 12, 2025
                 
                 for (let day = 1; day <= daysInMonth; day++) {
                     const date = new Date(
