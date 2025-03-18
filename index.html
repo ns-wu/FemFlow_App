@@ -729,6 +729,7 @@
             const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             
             let currentDate = new Date();
+
             let readingsData = {
                 "2025-03-11": [{ reading: 12.5, timestamp: new Date("2025-03-11T08:30:00").getTime() }],
                 "2025-03-12": [{ reading: 18.3, timestamp: new Date("2025-03-12T09:15:00").getTime() }],
@@ -785,7 +786,8 @@
                         day
                     );
                     
-                    const isToday = date.toDateString() === today.toDateString();
+                    // const isToday = date.toDateString() === today.toDateString();
+                    const isToday = date.getDate() === 24;
                     const dateStr = formatDate(date);
                     const readings = readingsData[dateStr] || [];
                     
