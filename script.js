@@ -17,257 +17,257 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const username = "user123";
 
-class BLEManager {
-    constructor() {
-        this.device = null;
-        this.server = null;
-        this.service = null;
-        this.characteristic = null;
-        this.isConnected = false;
-        this.terminal = new Terminal();
-    }
+// class BLEManager {
+//     constructor() {
+//         this.device = null;
+//         this.server = null;
+//         this.service = null;
+//         this.characteristic = null;
+//         this.isConnected = false;
+//         this.terminal = new Terminal();
+//     }
 
-    async connect() {
-        try {
-            this.terminal.log('Requesting Bluetooth Device...');
-            this.device = await navigator.bluetooth.requestDevice({
-                // Add your device filters here
-                filters: [
-                    // Example filter - update based on your device
-                    { services: ['battery_service'] }
-                ]
-            });
+//     async connect() {
+//         try {
+//             this.terminal.log('Requesting Bluetooth Device...');
+//             this.device = await navigator.bluetooth.requestDevice({
+//                 // Add your device filters here
+//                 filters: [
+//                     // Example filter - update based on your device
+//                     { services: ['battery_service'] }
+//                 ]
+//             });
 
-            this.terminal.log('Connecting to GATT Server...');
-            this.server = await this.device.gatt.connect();
+//             this.terminal.log('Connecting to GATT Server...');
+//             this.server = await this.device.gatt.connect();
 
-            this.terminal.log('Getting Service...');
-            this.service = await this.server.getPrimaryService('battery_service');
+//             this.terminal.log('Getting Service...');
+//             this.service = await this.server.getPrimaryService('battery_service');
 
-            this.terminal.log('Getting Characteristic...');
-            this.characteristic = await this.service.getCharacteristic('battery_level');
+//             this.terminal.log('Getting Characteristic...');
+//             this.characteristic = await this.service.getCharacteristic('battery_level');
 
-            this.isConnected = true;
-            this.terminal.log('Connected successfully!');
+//             this.isConnected = true;
+//             this.terminal.log('Connected successfully!');
 
-            // Setup disconnect listener
-            this.device.addEventListener('gattserverdisconnected', () => {
-                this.isConnected = false;
-                this.terminal.log('Device disconnected');
-            });
+//             // Setup disconnect listener
+//             this.device.addEventListener('gattserverdisconnected', () => {
+//                 this.isConnected = false;
+//                 this.terminal.log('Device disconnected');
+//             });
 
-            // Start notification listener
-            await this.startNotifications();
+//             // Start notification listener
+//             await this.startNotifications();
 
-        } catch (error) {
-            this.terminal.log(`Error: ${error}`);
-            throw error;
-        }
-    }
+//         } catch (error) {
+//             this.terminal.log(`Error: ${error}`);
+//             throw error;
+//         }
+//     }
 
-    async disconnect() {
-        if (this.device && this.device.gatt.connected) {
-            await this.device.gatt.disconnect();
-            this.terminal.log('Disconnected from device');
-        }
-    }
+//     async disconnect() {
+//         if (this.device && this.device.gatt.connected) {
+//             await this.device.gatt.disconnect();
+//             this.terminal.log('Disconnected from device');
+//         }
+//     }
 
-    async startNotifications() {
-        if (!this.characteristic) {
-            this.terminal.log('No characteristic available');
-            return;
-        }
+//     async startNotifications() {
+//         if (!this.characteristic) {
+//             this.terminal.log('No characteristic available');
+//             return;
+//         }
 
-        try {
-            await this.characteristic.startNotifications();
-            this.characteristic.addEventListener('characteristicvaluechanged', (event) => {
-                const value = event.target.value;
-                this.terminal.log(`Received value: ${value}`);
-            });
-            this.terminal.log('Notifications started');
-        } catch (error) {
-            this.terminal.log(`Error starting notifications: ${error}`);
-        }
-    }
+//         try {
+//             await this.characteristic.startNotifications();
+//             this.characteristic.addEventListener('characteristicvaluechanged', (event) => {
+//                 const value = event.target.value;
+//                 this.terminal.log(`Received value: ${value}`);
+//             });
+//             this.terminal.log('Notifications started');
+//         } catch (error) {
+//             this.terminal.log(`Error starting notifications: ${error}`);
+//         }
+//     }
 
-    async sendCommand(command) {
-        if (!this.isConnected) {
-            this.terminal.log('Not connected to device');
-            return;
-        }
+//     async sendCommand(command) {
+//         if (!this.isConnected) {
+//             this.terminal.log('Not connected to device');
+//             return;
+//         }
 
-        try {
-            const encoder = new TextEncoder();
-            await this.characteristic.writeValue(encoder.encode(command));
-            this.terminal.log(`Sent command: ${command}`);
-        } catch (error) {
-            this.terminal.log(`Error sending command: ${error}`);
-        }
-    }
-}
+//         try {
+//             const encoder = new TextEncoder();
+//             await this.characteristic.writeValue(encoder.encode(command));
+//             this.terminal.log(`Sent command: ${command}`);
+//         } catch (error) {
+//             this.terminal.log(`Error sending command: ${error}`);
+//         }
+//     }
+// }
 
-class SerialMonitor {
-    constructor(socketUrl) {
-        this.socket = new WebSocket(socketUrl);
-        this.createMonitorUI();
-        this.logs = [];
-        this.maxLogs = 100;
+// class SerialMonitor {
+//     constructor(socketUrl) {
+//         this.socket = new WebSocket(socketUrl);
+//         this.createMonitorUI();
+//         this.logs = [];
+//         this.maxLogs = 100;
 
-        this.socket.onopen = () => this.log("Connected to Serial Device");
-        this.socket.onmessage = (event) => this.log(event.data);
-        this.socket.onerror = (error) => this.log(`WebSocket Error: ${error.message}`);
-        this.socket.onclose = () => this.log("Disconnected from Serial Device");
-    }
+//         this.socket.onopen = () => this.log("Connected to Serial Device");
+//         this.socket.onmessage = (event) => this.log(event.data);
+//         this.socket.onerror = (error) => this.log(`WebSocket Error: ${error.message}`);
+//         this.socket.onclose = () => this.log("Disconnected from Serial Device");
+//     }
 
-    createMonitorUI() {
-        // Create serial monitor container
-        const monitor = document.createElement('div');
-        monitor.className = 'serial-monitor';
-        monitor.innerHTML = `
-            <div class="monitor-header">
-                <span>Serial Monitor</span>
-                <button id="clear-monitor">Clear</button>
-            </div>
-            <div class="monitor-body" id="monitor-body"></div>
-            <div class="monitor-input">
-                <input type="text" id="monitor-command" placeholder="Type command...">
-                <button id="send-monitor-command">Send</button>
-            </div>
-        `;
+//     createMonitorUI() {
+//         // Create serial monitor container
+//         const monitor = document.createElement('div');
+//         monitor.className = 'serial-monitor';
+//         monitor.innerHTML = `
+//             <div class="monitor-header">
+//                 <span>Serial Monitor</span>
+//                 <button id="clear-monitor">Clear</button>
+//             </div>
+//             <div class="monitor-body" id="monitor-body"></div>
+//             <div class="monitor-input">
+//                 <input type="text" id="monitor-command" placeholder="Type command...">
+//                 <button id="send-monitor-command">Send</button>
+//             </div>
+//         `;
 
-        // Add monitor to page
-        document.body.appendChild(monitor);
+//         // Add monitor to page
+//         document.body.appendChild(monitor);
 
-        // Event listeners
-        document.getElementById('clear-monitor').addEventListener('click', () => this.clear());
-        document.getElementById('send-monitor-command').addEventListener('click', () => this.sendCommand());
-        document.getElementById('monitor-command').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.sendCommand();
-        });
-    }
+//         // Event listeners
+//         document.getElementById('clear-monitor').addEventListener('click', () => this.clear());
+//         document.getElementById('send-monitor-command').addEventListener('click', () => this.sendCommand());
+//         document.getElementById('monitor-command').addEventListener('keypress', (e) => {
+//             if (e.key === 'Enter') this.sendCommand();
+//         });
+//     }
 
-    log(message) {
-        const timestamp = new Date().toLocaleTimeString();
-        const logEntry = `[${timestamp}] ${message}`;
-        this.logs.push(logEntry);
+//     log(message) {
+//         const timestamp = new Date().toLocaleTimeString();
+//         const logEntry = `[${timestamp}] ${message}`;
+//         this.logs.push(logEntry);
 
-        if (this.logs.length > this.maxLogs) {
-            this.logs.shift(); // Remove old logs
-        }
+//         if (this.logs.length > this.maxLogs) {
+//             this.logs.shift(); // Remove old logs
+//         }
 
-        const monitorBody = document.getElementById('monitor-body');
-        const logElement = document.createElement('div');
-        logElement.className = 'monitor-log';
-        logElement.textContent = logEntry;
-        monitorBody.appendChild(logElement);
-        monitorBody.scrollTop = monitorBody.scrollHeight; // Auto-scroll
-    }
+//         const monitorBody = document.getElementById('monitor-body');
+//         const logElement = document.createElement('div');
+//         logElement.className = 'monitor-log';
+//         logElement.textContent = logEntry;
+//         monitorBody.appendChild(logElement);
+//         monitorBody.scrollTop = monitorBody.scrollHeight; // Auto-scroll
+//     }
 
-    clear() {
-        this.logs = [];
-        document.getElementById('monitor-body').innerHTML = '';
-    }
+//     clear() {
+//         this.logs = [];
+//         document.getElementById('monitor-body').innerHTML = '';
+//     }
 
-    sendCommand() {
-        const commandInput = document.getElementById('monitor-command');
-        const command = commandInput.value.trim();
+//     sendCommand() {
+//         const commandInput = document.getElementById('monitor-command');
+//         const command = commandInput.value.trim();
 
-        if (command && this.socket.readyState === WebSocket.OPEN) {
-            this.socket.send(command);
-            this.log(`> ${command}`);
-            commandInput.value = '';
-        } else {
-            this.log("Error: Unable to send command (socket closed or command empty)");
-        }
-    }
-}
+//         if (command && this.socket.readyState === WebSocket.OPEN) {
+//             this.socket.send(command);
+//             this.log(`> ${command}`);
+//             commandInput.value = '';
+//         } else {
+//             this.log("Error: Unable to send command (socket closed or command empty)");
+//         }
+//     }
+// }
 
-// Usage: Replace `ws://your-websocket-url` with your actual WebSocket server address
-const serialMonitor = new SerialMonitor("ws://localhost:8765"); 
+// // Usage: Replace `ws://your-websocket-url` with your actual WebSocket server address
+// const serialMonitor = new SerialMonitor("ws://localhost:8765"); 
 
-// Add CSS styles for the serial monitor
-const style = document.createElement('style');
-style.textContent = `
-    .serial-monitor {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        width: 400px;
-        height: 300px;
-        background: #B2035B;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(178, 3, 91, 0.1);
-        display: flex;
-        flex-direction: column;
-        z-index: 1000;
-    }
+// // Add CSS styles for the serial monitor
+// const style = document.createElement('style');
+// style.textContent = `
+//     .serial-monitor {
+//         position: fixed;
+//         bottom: 20px;
+//         right: 20px;
+//         width: 400px;
+//         height: 300px;
+//         background: #B2035B;
+//         border-radius: 8px;
+//         box-shadow: 0 4px 6px rgba(178, 3, 91, 0.1);
+//         display: flex;
+//         flex-direction: column;
+//         z-index: 1000;
+//     }
 
-    .monitor-header {
-        padding: 10px;
-        background: #394648;
-        border-top-left-radius: 8px;
-        border-top-right-radius: 8px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        color: #FFF9EC;
-    }
+//     .monitor-header {
+//         padding: 10px;
+//         background: #394648;
+//         border-top-left-radius: 8px;
+//         border-top-right-radius: 8px;
+//         display: flex;
+//         justify-content: space-between;
+//         align-items: center;
+//         color: #FFF9EC;
+//     }
 
-    .monitor-body {
-        flex-grow: 1;
-        padding: 10px;
-        overflow-y: auto;
-        color: #FFF9EC;
-        font-family: monospace;
-        font-size: 14px;
-        background: #222; /* Darker background for better contrast */
-        border-top: 1px solid #555;
-    }
+//     .monitor-body {
+//         flex-grow: 1;
+//         padding: 10px;
+//         overflow-y: auto;
+//         color: #FFF9EC;
+//         font-family: monospace;
+//         font-size: 14px;
+//         background: #222; /* Darker background for better contrast */
+//         border-top: 1px solid #555;
+//     }
 
-    .monitor-log {
-        margin: 2px 0;
-        word-wrap: break-word;
-    }
+//     .monitor-log {
+//         margin: 2px 0;
+//         word-wrap: break-word;
+//     }
 
-    .monitor-input {
-        display: flex;
-        padding: 10px;
-        background: #394648;
-        border-bottom-left-radius: 8px;
-        border-bottom-right-radius: 8px;
-    }
+//     .monitor-input {
+//         display: flex;
+//         padding: 10px;
+//         background: #394648;
+//         border-bottom-left-radius: 8px;
+//         border-bottom-right-radius: 8px;
+//     }
 
-    .monitor-input input {
-        flex-grow: 1;
-        margin-right: 10px;
-        padding: 5px;
-        background: #DE3A86;
-        border: 1px solid #555;
-        color: #FFF9EC;
-        border-radius: 4px;
-    }
+//     .monitor-input input {
+//         flex-grow: 1;
+//         margin-right: 10px;
+//         padding: 5px;
+//         background: #DE3A86;
+//         border: 1px solid #555;
+//         color: #FFF9EC;
+//         border-radius: 4px;
+//     }
     
-    .monitor-input input::placeholder {
-        color: #FFD2E5;
-        opacity: 1;
-    }
+//     .monitor-input input::placeholder {
+//         color: #FFD2E5;
+//         opacity: 1;
+//     }
 
-    .monitor-input button,
-    .monitor-header button {
-        padding: 5px 10px;
-        background: #DE3A86;
-        color: #FFF9EC;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
+//     .monitor-input button,
+//     .monitor-header button {
+//         padding: 5px 10px;
+//         background: #DE3A86;
+//         color: #FFF9EC;
+//         border: none;
+//         border-radius: 4px;
+//         cursor: pointer;
+//     }
 
-    .monitor-input button:hover,
-    .monitor-header button:hover {
-        background: #F9C1E6;
-    }
-`;
-document.head.appendChild(style);
+//     .monitor-input button:hover,
+//     .monitor-header button:hover {
+//         background: #F9C1E6;
+//     }
+// `;
+// document.head.appendChild(style);
 
 
 // Initialize BLE manager and connect it to your Calendar class
