@@ -559,6 +559,92 @@
             font-size: 16px;
             margin-top: 8px;
         }
+        .serial-container {
+        max-width: 1000px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #FFFFFF;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .serial-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .serial-controls button {
+            color: #B2035B;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 5px;
+            border: 1px solid #B2035B;
+            background-color: #F9C1E6;
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        .serial-controls button:hover {
+            background-color: #B2035B;
+            color: #F9C1E6;
+        }
+
+        #data-window {
+            height: 300px;
+            width: 100%;
+            overflow-y: auto;
+            border: 1px solid #F9C1E6;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #FFF9EC;
+            font-family: monospace;
+            margin-top: 15px;
+        }
+
+        #serial .input-group {
+            display: flex;
+            width: 100%;
+            max-width: 500px;
+            margin: 10px auto;
+        }
+
+        #serial .input-group input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #F9C1E6;
+            border-radius: 5px 0 0 5px;
+            font-size: 14px;
+        }
+
+        #serial .input-group button {
+            margin: 0;
+            border-radius: 0 5px 5px 0;
+            border-left: none;
+            min-width: 80px;
+        }
+
+        /* Styles for different types of messages in the data window */
+        .data-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid #fbd8ef;
+            color: #394648;
+        }
+
+        .float-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid #fbd8ef;
+            color: #B2035B;
+            font-weight: bold;
+        }
+
+        .system-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid #fbd8ef;
+            color: #666;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -572,6 +658,7 @@
         <button class="tab-button" data-tab="calendar">Calendar</button>
         <button class="tab-button" data-tab="statistics">Statistics</button>
         <button class="tab-button" data-tab="goals">Goals</button>
+        <button class="tab-button" data-tab="serial">Raw Data</button>
     </div>
 
     <div id="home" class="tab-content active">
@@ -584,7 +671,9 @@
         </div>
         
         <div class="button-container">
-            <button id="connect">Connect to SmartCup</button>
+            <!-- <button id="connect">Connect to SmartCup</button> -->
+            <button py-click="sm.askForSerial()" id="open">Connect to SmartCup</button>
+            <button id="empty-cup">Empty Cup</button>
             <button id="simulate-data">Simulate Data</button>
         </div>
         
@@ -708,13 +797,38 @@
         </div>
     </div>
 
+    <div id="serial" class="tab-content">
+        <h1>Raw Data</h1>
+        
+        <div class="serial-container card">
+            <div class="serial-controls">
+                <button py-click="sm.askForSerial()" id="open">Connect Cup</button>
+                <button py-click="sm.clearDataWindow()" id="clear">Clear Data</button>
+                
+                <div class="input-group">
+                    <input type="text" id="text" placeholder="Send command...">
+                    <button py-click="sendValueFromInputBox(sm)" id="write">Send</button>
+                </div>
+            </div>
+            
+            <div id="data-window"></div>
+        </div>
+        
+        <py-script src="webserialdemo.py"></py-script>
+    </div>
+
+    <script defer src="https://pyscript.net/releases/2022.12.1/pyscript.js"></script>
+    
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Progress bar elements
             const progressBar = document.getElementById('fill-level');
             const valueDisplay = document.getElementById('fill-value');
-            const connectButton = document.getElementById('connect');
+            // const connectButton = document.getElementById('connect');
+            const emptyButton = document.getElementById('empty-cup');
             const simulateButton = document.getElementById('simulate-data');
+            const dataWindow = document.getElementById('data-window');
             
             // Tab functionality
             const tabButtons = document.querySelectorAll('.tab-button');
@@ -885,6 +999,7 @@
                 }
             }
             
+            
             function formatDate(date) {
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -986,15 +1101,48 @@
                     showNotification('SmartCup is almost full! Consider emptying soon.');
                 }
             }
-
-            // Connect to SmartCup button functionality
-            connectButton.addEventListener('click', function() {
-                showNotification('Connecting to SmartCup device...');
-                setTimeout(() => {
-                    showNotification('SmartCup connected successfully!');
-                    simulateButton.disabled = false;
-                }, 2000);
+            // Listen for serial values from Python
+            document.addEventListener('serialValueReceived', function(event) {
+                const value = event.detail.value;
+                runningSum += value;
+                updateProgress();
+                
+                // Add to readings data for today
+                const today = formatDate(new Date());
+                if (!readingsData[today]) {
+                    readingsData[today] = [];
+                }
+                
+                readingsData[today].push({
+                    reading: value,
+                    timestamp: new Date().getTime()
+                });
+                
+                // Update calendar if we're viewing the current month
+                if (currentDate.getMonth() === new Date().getMonth() && 
+                    currentDate.getFullYear() === new Date().getFullYear()) {
+                    renderCalendar();
+                }
+                
+                showNotification(`New reading from device: ${value.toFixed(1)} ml`);
             });
+            
+            emptyButton.addEventListener('click', function() {
+                runningSum = 0;
+                updateProgress();
+                showNotification('SmartCup emptied successfully!');
+            });
+
+            
+
+            // // Connect to SmartCup button functionality
+            // connectButton.addEventListener('click', function() {
+            //     showNotification('Connecting to SmartCup device...');
+            //     setTimeout(() => {
+            //         showNotification('SmartCup connected successfully!');
+            //         simulateButton.disabled = false;
+            //     }, 2000);
+            // });
 
             // Simulate data functionality
             simulateButton.addEventListener('click', function() {
@@ -1089,8 +1237,11 @@
             updateProgress();
 
             // For demo purposes, randomize some starting data
-            simulateButton.click();
+            // simulateButton.click();
             })
+            console.log("DOM loaded");
+            console.log("Calendar element:", document.getElementById('calendar-grid'));
+            console.log("Current month element:", document.getElementById('currentMonthYear'));
         
         
     </script>
