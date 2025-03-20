@@ -95,14 +95,13 @@ class SerialManager():
             try:
                 # Try to format as a float with 2 decimal places
                 value = float(buffer)
-                if value == 0.00:
-                    return  
-                formatted = f"{value:.2f}"
-                self.appendToDataWindow(formatted, "float")
+                if value != 0.00: 
+                    formatted = f"{value:.2f}"
+                    self.appendToDataWindow(formatted, "float")
                 
-                # Dispatch an event for JavaScript to handle
-                event = window.CustomEvent.new("serialValueReceived", j({"detail": {"value": value}}))
-                document.dispatchEvent(event)
+                    # Dispatch an event for JavaScript to handle
+                    event = window.CustomEvent.new("serialValueReceived", j({"detail": {"value": value}}))
+                    document.dispatchEvent(event)
             except ValueError:
                 # If not a valid float, just print the raw buffer
                 self.appendToDataWindow(buffer, "data")
