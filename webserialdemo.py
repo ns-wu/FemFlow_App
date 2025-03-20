@@ -95,6 +95,8 @@ class SerialManager():
             try:
                 # Try to format as a float with 2 decimal places
                 value = float(buffer)
+                if value == 0.00:
+                    return  
                 formatted = f"{value:.2f}"
                 self.appendToDataWindow(formatted, "float")
                 
